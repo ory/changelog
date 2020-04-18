@@ -6,10 +6,10 @@ const readFile = Q.denodeify(require('fs').readFile)
 const resolve = require('path').resolve
 
 module.exports = Q.all([
-  readFile(resolve(__dirname, './templates/template.hbs'), 'utf-8'),
-  readFile(resolve(__dirname, './templates/header.hbs'), 'utf-8'),
-  readFile(resolve(__dirname, './templates/commit.hbs'), 'utf-8'),
-  readFile(resolve(__dirname, './templates/footer.hbs'), 'utf-8')
+  readFile(resolve(__dirname, './templates/default/template.hbs'), 'utf-8'),
+  readFile(resolve(__dirname, './templates/default/header.hbs'), 'utf-8'),
+  readFile(resolve(__dirname, './templates/default/commit.hbs'), 'utf-8'),
+  readFile(resolve(__dirname, './templates/default/footer.hbs'), 'utf-8')
 ])
   .spread((template, header, commit, footer) => {
     const writerOpts = getWriterOpts()
