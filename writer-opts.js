@@ -118,7 +118,7 @@ function getWriterOpts() {
         commit.body = commit.body.replace(/^signed-off-by: .*$/mi, '')
         commit.body = commit.body.replace(/^co-authored-by: .*$/mi, '')
         if (commit.body.trim().length > 0) {
-          commit.body = commit.body.split('\n').map((text)=>`  > ${text}`).join('\n')
+          commit.body = '\n' + commit.body.split('\n').map((text) => `    > ${text}`).join('\n')
           commit.hasBody = true
         }
       }
