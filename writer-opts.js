@@ -4,6 +4,7 @@ const compareFunc = require('compare-func')
 const Q = require('q')
 const readFile = Q.denodeify(require('fs').readFile)
 const resolve = require('path').resolve
+const exec = require('child_process').execSync
 
 module.exports = Q.all([
   readFile(resolve(__dirname, './templates/default/template.hbs'), 'utf-8'),
@@ -46,6 +47,13 @@ var ignoreTypes = [
   'ci'
 ]
 
+function getGitTagMessage(tag) {
+  if (!tag) {
+    return ''
+  }
+  return exec(`git tag -l --format='%(contents)' v${tag}`).toString()
+}
+
 function getWriterOpts() {
   return {
     transform: (commit, context) => {
@@ -53,7 +61,7 @@ function getWriterOpts() {
       const issues = []
 
       commit.notes.forEach(note => {
-        note.title = 'BREAKING CHANGES'
+        note.title = 'Breaking Changes'
         discard = false
       })
 
@@ -63,6 +71,17 @@ function getWriterOpts() {
 
       if (!types[commit.type]) {
         commit.type = 'other'
+      }
+
+      if (commit.version) {
+        discard = false
+        const message = getGitTagMessage(commit.version)
+        if (message.length > 0) {
+          commit.notes.unshift({
+            text: message,
+            title: '',
+          })
+        }
       }
 
       if (ignoreTypes.indexOf(commit.type) > -1 && discard) {
@@ -118,7 +137,7 @@ function getWriterOpts() {
         commit.body = commit.body.replace(/^signed-off-by: .*$/mi, '')
         commit.body = commit.body.replace(/^co-authored-by: .*$/mi, '')
         if (commit.body.trim().length > 0) {
-          commit.body = '\n' + commit.body.split('\n').map((text) => `    > ${text}`).join('\n')
+          commit.body = '   \n' + commit.body.split('\n').map((text) => `   ${text}`).join('\n')
           commit.hasBody = true
         }
       }
