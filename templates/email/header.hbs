@@ -1,0 +1,15 @@
+{{#if noteGroups}}
+{{#each noteGroups}}
+{{#if isReleaseNote}}{{else}}
+{{#if title~}}
+## {{title}}
+{{/if}}
+
+{{#each notes}}
+{{#if isReleaseNote}}{{else}}
+{{text}}
+{{~/if}}
+{{~/each}}
+{{~/if}}
+{{~/each}}
+{{~/if}}
