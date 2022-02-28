@@ -51,7 +51,9 @@ function getGitTagMessage(tag) {
   if (!tag) {
     return ''
   }
-  return exec(`git tag -l --format='%(contents)' v${tag}`).toString()
+  var message = exec(`git tag -l --format='%(contents)' v${tag}`).toString()
+  // remove possible signatures
+  return message.replace(/-*BEGIN PGP SIGNATURE-*[\s\S]*-*END PGP SIGNATURE-*/g, '')
 }
 
 function getWriterOpts() {
