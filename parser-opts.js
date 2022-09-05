@@ -1,8 +1,5 @@
-'use strict'
+"use strict";
 
 module.exports = {
-  noteKeywords: [
-    'BREAKING CHANGE',
-    'BREAKING CHANGES',
-  ]
-}
+  noteKeywords: ["BREAKING CHANGE", "BREAKING CHANGES"],
+};
