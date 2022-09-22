@@ -1,6 +1,7 @@
 {
   "name": "@oryd/changelog",
   "bin": "./index.js",
+  "prettier": "ory-prettier-styles",
   "dependencies": {
     "compare-func": "^2.0.0",
     "q": "^1.5.1"
