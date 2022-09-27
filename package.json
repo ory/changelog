@@ -1,12 +1,14 @@
 {
   "name": "@oryd/changelog",
   "bin": "./index.js",
+  "prettier": "ory-prettier-styles",
   "dependencies": {
     "compare-func": "^2.0.0",
     "q": "^1.5.1"
   },
   "devDependencies": {
-    "prettier": "^2.7.1",
+    "ory-prettier-styles": "1.3.0",
+    "prettier": "2.7.1",
     "prettier-plugin-packagejson": "^2.2.18"
   },
   "engines": {

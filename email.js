@@ -1,11 +1,11 @@
-"use strict";
-const Q = require("q");
-const conventionalChangelog = require("./conventional-changelog");
-const parserOpts = require("./parser-opts");
-const recommendedBumpOpts = require("./conventional-recommended-bump");
-const writerOpts = require("./writer-opts");
-const readFile = Q.denodeify(require("fs").readFile);
-const resolve = require("path").resolve;
+"use strict"
+const Q = require("q")
+const conventionalChangelog = require("./conventional-changelog")
+const parserOpts = require("./parser-opts")
+const recommendedBumpOpts = require("./conventional-recommended-bump")
+const writerOpts = require("./writer-opts")
+const readFile = Q.denodeify(require("fs").readFile)
+const resolve = require("path").resolve
 
 module.exports = Q.all([
   conventionalChangelog,
@@ -25,18 +25,18 @@ module.exports = Q.all([
     template,
     header,
     commit,
-    footer
+    footer,
   ) => {
-    writerOpts.mainTemplate = template;
-    writerOpts.headerPartial = header;
-    writerOpts.commitPartial = commit;
-    writerOpts.footerPartial = footer;
+    writerOpts.mainTemplate = template
+    writerOpts.headerPartial = header
+    writerOpts.commitPartial = commit
+    writerOpts.footerPartial = footer
 
     return {
       conventionalChangelog,
       parserOpts,
       recommendedBumpOpts,
       writerOpts,
-    };
-  }
-);
+    }
+  },
+)

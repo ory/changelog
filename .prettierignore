@@ -1,1 +1,4 @@
 *.hbs
+LICENSE
+LICENSE.md
+package-lock.json
