@@ -1,3 +1,5 @@
+// Copyright © 2022 Ory Corp
+
 "use strict"
 
 const Q = require("q")
