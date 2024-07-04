@@ -1,4 +1,4 @@
-// Copyright © 2022 Ory Corp
+// Copyright © 2024 Ory Corp
 // SPDX-License-Identifier: Apache-2.0
 
 "use strict"
@@ -59,28 +59,36 @@ function getGitTagMessage(tag) {
 function getWriterOpts() {
   return {
     transform: (commit, context) => {
-      let discard = true
+      if (
+        commit.notes.length === 0 &&
+        !commit.version &&
+        ignoreTypes.includes(commit.type)
+      ) {
+        return
+      }
       const issues = []
 
-      commit.notes.forEach((note) => {
-        note.title = "Breaking Changes"
-        note.isReleaseNote = false
-        discard = false
+      const notes = commit.notes.map((note) => {
+        return {
+          ...note,
+          title: "Breaking Changes",
+          isReleaseNote: false,
+        }
       })
 
+      let type
       if (commit.revert) {
-        commit.type = "revert"
-      }
-
-      if (!types[commit.type]) {
-        commit.type = "other"
+        type = types.revert
+      } else if (types[commit.type]) {
+        type = types[commit.type]
+      } else {
+        type = types.other
       }
 
       if (commit.version) {
-        discard = false
         const message = getGitTagMessage(commit.version)
         if (message.length > 0) {
-          commit.notes.unshift({
+          notes.unshift({
             text: message,
             title: "",
             isReleaseNote: true,
@@ -88,35 +96,34 @@ function getWriterOpts() {
         }
       }
 
-      if (ignoreTypes.indexOf(commit.type) > -1 && discard) {
-        return
-      }
+      const scope = commit.scope === "*" ? "" : commit.scope
 
-      commit.type = types[commit.type]
-
-      if (commit.scope === "*") {
-        commit.scope = ""
-      }
-
+      let shortHash = commit.shortHash
+      let hash = commit.hash
       if (typeof commit.hash === "string") {
-        commit.shortHash = commit.hash.substring(0, 7)
+        shortHash = commit.hash.substring(0, 7)
+      } else {
+        // some commits don't include the hash for some reason, so we extract it from the footer
+        hash = commit.footer.split("\n").at(-1).replaceAll("'", "")
+        shortHash = hash.substring(0, 7)
       }
 
-      if (typeof commit.subject === "string") {
+      let subject = commit.subject
+      if (typeof subject === "string") {
         let url = context.repository
           ? `${context.host}/${context.owner}/${context.repository}`
           : context.repoUrl
         if (url) {
           url = `${url}/issues/`
           // Issue URLs.
-          commit.subject = commit.subject.replace(/#([0-9]+)/g, (_, issue) => {
+          subject = subject.replace(/#([0-9]+)/g, (_, issue) => {
             issues.push(issue)
             return `[#${issue}](${url}${issue})`
           })
         }
         if (context.host) {
           // User URLs.
-          commit.subject = commit.subject.replace(
+          subject = subject.replace(
             /\B@([a-z0-9](?:-?[a-z0-9/]){0,38})/g,
             (_, username) => {
               if (username.includes("/")) {
@@ -127,12 +134,11 @@ function getWriterOpts() {
             },
           )
         }
-        commit.subject =
-          commit.subject.charAt(0).toUpperCase() + commit.subject.substring(1)
+        subject = subject.charAt(0).toUpperCase() + subject.substring(1)
       }
 
       // remove references that already appear in the subject
-      commit.references = commit.references.filter((reference) => {
+      const references = commit.references.filter((reference) => {
         if (issues.indexOf(reference.issue) === -1) {
           return true
         }
@@ -140,23 +146,36 @@ function getWriterOpts() {
         return false
       })
 
-      commit.hasBody = false
-      if (typeof commit.body === "string") {
-        commit.body = commit.body.replace(/^signed-off-by: .*$/im, "")
-        commit.body = commit.body.replace(/^co-authored-by: .*$/im, "")
-        if (commit.body.trim().length > 0) {
-          commit.body =
+      let hasBody = false
+      let body = commit.body
+      if (typeof body === "string") {
+        body = body.replace(/^signed-off-by: .*$/im, "")
+        body = body.replace(/^co-authored-by: .*$/im, "")
+        if (body.trim().length > 0) {
+          body =
             "\n" +
-            commit.body
+            body
               .split("\n")
               .map((text) => `    ${text}`)
               .join("\n") +
             "\n"
-          commit.hasBody = true
+          hasBody = true
         }
       }
 
-      return commit
+      return {
+        ...commit,
+        notes,
+        type,
+        scope,
+        subject,
+        issues,
+        references,
+        hash,
+        shortHash,
+        hasBody,
+        body,
+      }
     },
     groupBy: "type",
     commitGroupsSort: "title",
